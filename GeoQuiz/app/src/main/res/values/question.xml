@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<string name="question_yym">
+        Question One
+    </string>
+    <string name="question_hhy">
+        Question Two
+    </string>
+    <string name="question_yzw">
+        Question Three
+    </string>
+</resources>
