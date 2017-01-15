@@ -1,11 +1,10 @@
-package com.example.heleninsa.criminalintent;
+package com.example.heleninsa.criminalintent.controller;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +12,9 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+
+import com.example.heleninsa.criminalintent.model.Crime;
+import com.example.heleninsa.criminalintent.R;
 
 import java.text.SimpleDateFormat;
 import java.util.Locale;

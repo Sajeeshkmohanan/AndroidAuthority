@@ -1,4 +1,4 @@
-package com.example.heleninsa.criminalintent;
+package com.example.heleninsa.criminalintent.model;
 
 import java.util.Date;
 import java.util.UUID;

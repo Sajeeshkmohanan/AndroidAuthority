@@ -1,4 +1,4 @@
-package com.example.heleninsa.criminalintent;
+package com.example.heleninsa.criminalintent.model;
 
 import android.content.Context;
 
