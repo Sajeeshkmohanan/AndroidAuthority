@@ -1,5 +1,6 @@
 package com.example.heleninsa.criminalintent.controller;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -26,11 +27,12 @@ public class CrimeListFragment extends Fragment {
     private RecyclerView mRecyclerView;
     private CrimeAdapter mAdapter;
 
+    private int mLocation;
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_crime_list, container, false);
-
         mRecyclerView = (RecyclerView) view.findViewById(R.id.crime_recycler_view);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
@@ -40,10 +42,15 @@ public class CrimeListFragment extends Fragment {
     }
 
     private void updateUI() {
-        CrimeLab crimeLab = CrimeLab.getInstance(getActivity());
-        List<Crime> crimes = crimeLab.getCrimes();
-        mAdapter = new CrimeAdapter(crimes);
-        mRecyclerView.setAdapter(mAdapter);
+        if(mAdapter == null) {
+            CrimeLab crimeLab = CrimeLab.getInstance(getActivity());
+            List<Crime> crimes = crimeLab.getCrimes();
+            mAdapter = new CrimeAdapter(crimes);
+            mRecyclerView.setAdapter(mAdapter);
+        } else {
+            mAdapter.notifyDataSetChanged();
+//            mAdapter.notifyItemChanged(mLocation);
+        }
     }
 
     private class CrimeHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
@@ -71,7 +78,9 @@ public class CrimeListFragment extends Fragment {
 
         @Override
         public void onClick(View view) {
-
+            mLocation = getLayoutPosition();
+            Intent intent = CrimePageActivity.newIntent(getActivity(), mCrime.getId());
+            startActivity(intent);
         }
     }
 
@@ -101,4 +110,11 @@ public class CrimeListFragment extends Fragment {
             return mCrimes.size();
         }
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateUI();
+    }
+
 }
