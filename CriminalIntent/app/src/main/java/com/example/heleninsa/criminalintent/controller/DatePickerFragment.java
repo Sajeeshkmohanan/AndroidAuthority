@@ -31,6 +31,8 @@ public class DatePickerFragment extends DialogFragment {
 
     private DatePicker mDatePicker;
 
+    private Calendar mCalendar;
+
     public static DatePickerFragment newInstance(Date date) {
         Bundle args = new Bundle();
         args.putSerializable(ARG__DATE, date);
@@ -47,16 +49,15 @@ public class DatePickerFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         Date date = (Date) getArguments().getSerializable(ARG__DATE);
 
-        Calendar calender = Calendar.getInstance();
-        calender.setTime(date);
-        int year = calender.get(Calendar.YEAR);
-        int month = calender.get(Calendar.MONTH);
-        int day = calender.get(Calendar.DAY_OF_MONTH);
+        mCalendar = Calendar.getInstance();
+        mCalendar.setTime(date);
+        int year = mCalendar.get(Calendar.YEAR);
+        int month = mCalendar.get(Calendar.MONTH);
+        int day = mCalendar.get(Calendar.DAY_OF_MONTH);
 
         View v = LayoutInflater.from(getActivity()).inflate(R.layout.dialog_date, null);
         mDatePicker = (DatePicker) v.findViewById(R.id.dialog_date_date_picker);
         mDatePicker.init(year, month, day, null);
-
         return new AlertDialog.Builder(getActivity()).
                 setView(v).
                 setTitle(R.string.date_picker_title).
@@ -67,7 +68,10 @@ public class DatePickerFragment extends DialogFragment {
                                 int year = mDatePicker.getYear();
                                 int month = mDatePicker.getMonth();
                                 int day = mDatePicker.getDayOfMonth();
-                                Date date = new GregorianCalendar(year, month, day).getTime();
+                                int hour = mCalendar.get(Calendar.HOUR_OF_DAY);
+                                int minute = mCalendar.get(Calendar.MINUTE);
+                                int second = mCalendar.get(Calendar.SECOND);
+                                Date date = new GregorianCalendar(year, month, day, hour, minute, second).getTime();
                                 sendResult(Activity.RESULT_OK, date);
                             }
                         }).
@@ -75,11 +79,11 @@ public class DatePickerFragment extends DialogFragment {
     }
 
     private void sendResult(int resultCode, Date date) {
-        Fragment targerFragment = getTargetFragment();
-        if (targerFragment != null) {
+        Fragment targetFragment = getTargetFragment();
+        if (targetFragment != null) {
             Intent intent = new Intent();
             intent.putExtra(EXTRA_DATE, date);
-            targerFragment.onActivityResult(getTargetRequestCode(), resultCode, intent);
+            targetFragment.onActivityResult(getTargetRequestCode(), resultCode, intent);
         }
     }
 }
