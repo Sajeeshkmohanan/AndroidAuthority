@@ -5,10 +5,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AppCompatActivity;
 
 import com.example.heleninsa.criminalintent.R;
 import com.example.heleninsa.criminalintent.model.Crime;
@@ -21,7 +21,7 @@ import java.util.UUID;
  * Created by heleninsa on 2017/1/16.
  */
 
-public class CrimePageActivity extends FragmentActivity {
+public class CrimePageActivity extends AppCompatActivity {
 
     private static final String EXTRA_CRIME_ID = "com.heleninsa.criminalintent.controller.crime_id";
 
@@ -58,7 +58,6 @@ public class CrimePageActivity extends FragmentActivity {
 
         UUID crimeId = (UUID) getIntent().getSerializableExtra(EXTRA_CRIME_ID);
         mViewPager.setCurrentItem(getLocation(crimeId));
-
     }
 
     private int getLocation(UUID crimeID){

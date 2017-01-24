@@ -3,8 +3,8 @@ package com.example.heleninsa.criminalintent.controller;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.app.AppCompatActivity;
 
 import com.example.heleninsa.criminalintent.R;
 
@@ -12,7 +12,7 @@ import com.example.heleninsa.criminalintent.R;
  * Created by heleninsa on 2017/1/15.
  */
 
-public abstract class SimpleFragmentActivity extends FragmentActivity{
+public abstract class SimpleFragmentActivity extends AppCompatActivity{
 
     protected abstract Fragment getFragment();
 

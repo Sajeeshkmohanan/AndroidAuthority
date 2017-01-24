@@ -39,6 +39,14 @@
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"/>
 
+    <Button
+        android:id="@+id/delete_crime"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:text="@string/delete_crime"/>
+
     <CheckBox
         android:id="@+id/crime_solved"
         android:layout_width="match_parent"
@@ -46,5 +54,29 @@
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp"
         android:text="@string/crime_solved_label"/>
+
+    <Button
+        android:text="@string/crime_suspect_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:id="@+id/crime_suspect"/>
+
+    <Button
+        android:text="@string/crime_report_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:id="@+id/crime_report"/>
+
+    <Button
+        android:text="@string/crime_call_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:id="@+id/crime_call"/>
 
 </LinearLayout>
