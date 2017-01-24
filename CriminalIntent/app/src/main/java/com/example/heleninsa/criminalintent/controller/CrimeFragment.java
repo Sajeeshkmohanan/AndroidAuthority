@@ -10,10 +10,10 @@ import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.ShareCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.DateFormat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -221,20 +221,38 @@ public class CrimeFragment extends Fragment {
             onReceiveDate(date);
         } else if (requestCode == REQUEST_CONTACT && data != null) {
             Uri contactUri = data.getData();
-
-            String[] queryField = new String[]{ContactsContract.Contacts.DISPLAY_NAME, ContactsContract.CommonDataKinds.Phone.NUMBER};
-            Cursor c = getActivity().getContentResolver().query(contactUri, queryField, null, null, null);
+            Uri phoneUri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI;
+            String[] c_queryField = new String[]{ContactsContract.Contacts.DISPLAY_NAME, ContactsContract.Contacts._ID};
+            String[] p_queryField = new String[]{ContactsContract.CommonDataKinds.Phone.NUMBER};
+            Cursor c = getActivity().getContentResolver().query(contactUri, c_queryField, null, null, null);
+            Cursor p = null;
             try {
                 if (c.getCount() == 0) {
                     return;
                 }
                 c.moveToFirst();
                 String suspect = c.getString(c.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME));
-                String phone = c.getString(c.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
                 mCrime.setSuspect(suspect);
                 mSuspectButton.setText(suspect);
+
+                //获取 _ID
+                String id = c.getString(c.getColumnIndex(ContactsContract.Contacts._ID));
+                //指定查询范围 _ID = ? , id
+                //查询表Phone.
+                //指定查询范围为 Phone.Number
+                p = getActivity().getContentResolver().query(phoneUri, p_queryField, ContactsContract.Contacts._ID + " =?", new String[]{id}, null);
+                //判断为空。（没必要
+                if (p.getCount() != 0) {
+                    p.moveToFirst();
+
+                    String phone = p.getString(p.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+                    Log.e("Number", phone);
+                }
             } finally {
                 c.close();
+                if (p != null) {
+                    p.close();
+                }
             }
         }
 
