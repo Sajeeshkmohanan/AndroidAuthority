@@ -112,25 +112,19 @@ public class CrimeFragment extends Fragment {
 
 
         setDateText();
-        mDateButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                FragmentManager manager = getFragmentManager();
-                DatePickerFragment dialog = DatePickerFragment.newInstance(mCrime.getDate());
-                dialog.setTargetFragment(CrimeFragment.this, REQUEST_DATE);
-                dialog.show(manager, DIALOG_DATE);
-            }
+        mDateButton.setOnClickListener((v) -> {
+            FragmentManager manager = getFragmentManager();
+            DatePickerFragment dialog = DatePickerFragment.newInstance(mCrime.getDate());
+            dialog.setTargetFragment(CrimeFragment.this, REQUEST_DATE);
+            dialog.show(manager, DIALOG_DATE);
         });
 
 
-        mTimeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FragmentManager manager = getFragmentManager();
-                TimePickerFragment dialog = TimePickerFragment.newInstance(mCrime.getDate());
-                dialog.setTargetFragment(CrimeFragment.this, REQUEST_TIME);
-                dialog.show(manager, DIALOG_TIME);
-            }
+        mTimeButton.setOnClickListener((v) -> {
+            FragmentManager manager = getFragmentManager();
+            TimePickerFragment dialog = TimePickerFragment.newInstance(mCrime.getDate());
+            dialog.setTargetFragment(CrimeFragment.this, REQUEST_TIME);
+            dialog.show(manager, DIALOG_TIME);
         });
 
         mCrimeSolvedBox.setChecked(mCrime.isSolved());
@@ -141,27 +135,23 @@ public class CrimeFragment extends Fragment {
             }
         });
 
-        mDeleteButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                CrimeLab.getInstance(getActivity()).removeCrime(mCrime);
-                mIsDeleted = true;
-                getActivity().finish();
-            }
+        mDeleteButton.setOnClickListener((v) -> {
+            CrimeLab.getInstance(getActivity()).removeCrime(mCrime);
+            mIsDeleted = true;
+            getActivity().finish();
+
         });
 
-        mReportButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String report = getCrimeReport();
-                Intent intent = new Intent(Intent.ACTION_SENDTO);
+        mReportButton.setOnClickListener((v) -> {
+            String report = getCrimeReport();
+            Intent intent = new Intent(Intent.ACTION_SENDTO);
 
 //                intent.setType("text/plain");
 //                intent.putExtra(Intent.EXTRA_TEXT, report);
 //                intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.crime_report_subject));
-                intent.setData(Uri.parse("smsto:" + "15062278989"));
-                intent.putExtra("sms_body", report);
-                intent = Intent.createChooser(intent, getString(R.string.send_report));
+            intent.setData(Uri.parse("smsto:" + "15062278989"));
+            intent.putExtra("sms_body", report);
+            intent = Intent.createChooser(intent, getString(R.string.send_report));
 //
 //                Intent intent = ShareCompat.IntentBuilder.from(CrimeFragment.this.getActivity()).
 //                        setChooserTitle(getString(R.string.send_report)).
@@ -171,17 +161,13 @@ public class CrimeFragment extends Fragment {
 //                        addEmailBcc("15062278989").
 //                        createChooserIntent();
 
-                startActivity(intent);
-            }
+            startActivity(intent);
         });
 
         final Intent pickContact = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
-
-        mSuspectButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivityForResult(pickContact, REQUEST_CONTACT);
-            }
+//startActivityForResult(pickContact, REQUEST_CONTACT);
+        mSuspectButton.setOnClickListener((v) -> {
+            startActivityForResult(pickContact, REQUEST_CONTACT);
         });
 
         if (mCrime.getSuspect() != null) {
@@ -193,12 +179,9 @@ public class CrimeFragment extends Fragment {
             mSuspectButton.setEnabled(false);
         }
 
-        mCallButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:15062278989"));
-                startActivity(intent);
-            }
+        mCallButton.setOnClickListener((v) -> {
+            Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:15062278989"));
+            startActivity(intent);
         });
 
 
