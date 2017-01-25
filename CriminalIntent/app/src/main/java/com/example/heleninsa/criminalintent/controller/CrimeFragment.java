@@ -4,9 +4,11 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -17,15 +19,20 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 
 import com.example.heleninsa.criminalintent.R;
 import com.example.heleninsa.criminalintent.model.Crime;
 import com.example.heleninsa.criminalintent.model.CrimeLab;
+import com.example.heleninsa.criminalintent.util.PictureUtils;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -38,14 +45,18 @@ import java.util.UUID;
 public class CrimeFragment extends Fragment {
 
     private final static String ARG_CRIME_ID = "crime_id";
+
     private final static String DIALOG_DATE = "Dialog_Date";
     private final static String DIALOG_TIME = "Dialog_Time";
+    private final static String DIALOG_IMAGE =  "Dialog_Image";
 
     private final static int REQUEST_DATE = 0;
     private final static int REQUEST_TIME = 1;
     private final static int REQUEST_CONTACT = 2;
+    private final static int REQUEST_PHOTO = 3;
 
     private Crime mCrime;
+    private File mPhotoFile;
 
     private EditText mTitleField;
     private CheckBox mCrimeSolvedBox;
@@ -55,6 +66,8 @@ public class CrimeFragment extends Fragment {
     private Button mReportButton;
     private Button mSuspectButton;
     private Button mCallButton;
+    private ImageButton mPhotoButton;
+    private ImageView mPhotoView;
 
     private boolean mIsDeleted = false;
 
@@ -73,7 +86,9 @@ public class CrimeFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         UUID crimeId = (UUID) getArguments().getSerializable(ARG_CRIME_ID);
-        mCrime = CrimeLab.getInstance(getActivity()).getCrime(crimeId);
+        CrimeLab lab = CrimeLab.getInstance(getActivity());
+        mCrime = lab.getCrime(crimeId);
+        mPhotoFile = lab.getPhotoFile(mCrime);
     }
 
     @Nullable
@@ -91,6 +106,8 @@ public class CrimeFragment extends Fragment {
         mReportButton = (Button) view.findViewById(R.id.crime_report);
         mSuspectButton = (Button) view.findViewById(R.id.crime_suspect);
         mCallButton = (Button) view.findViewById(R.id.crime_call);
+        mPhotoButton = (ImageButton) view.findViewById(R.id.crime_camera);
+        mPhotoView = (ImageView) view.findViewById(R.id.crime_photo);
 
         mTitleField.setText(mCrime.getTitle());
         mTitleField.addTextChangedListener(new TextWatcher() {
@@ -164,8 +181,9 @@ public class CrimeFragment extends Fragment {
             startActivity(intent);
         });
 
+        PackageManager manager = getActivity().getPackageManager();
         final Intent pickContact = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
-//startActivityForResult(pickContact, REQUEST_CONTACT);
+
         mSuspectButton.setOnClickListener((v) -> {
             startActivityForResult(pickContact, REQUEST_CONTACT);
         });
@@ -174,7 +192,7 @@ public class CrimeFragment extends Fragment {
             mSuspectButton.setText(mCrime.getSuspect());
         }
 
-        PackageManager manager = getActivity().getPackageManager();
+
         if (manager.resolveActivity(pickContact, PackageManager.MATCH_DEFAULT_ONLY) == null) {
             mSuspectButton.setEnabled(false);
         }
@@ -182,6 +200,32 @@ public class CrimeFragment extends Fragment {
         mCallButton.setOnClickListener((v) -> {
             Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:15062278989"));
             startActivity(intent);
+        });
+
+        final Intent captureImage = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (manager.resolveActivity(captureImage, PackageManager.MATCH_DEFAULT_ONLY) == null || mPhotoFile == null) {
+            mPhotoButton.setEnabled(false);
+        } else {
+            Uri uri = Uri.fromFile(mPhotoFile);
+            captureImage.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+        }
+
+        mPhotoButton.setOnClickListener(v -> {
+            startActivityForResult(captureImage, REQUEST_PHOTO);
+        });
+
+        ViewTreeObserver observer = mPhotoView.getViewTreeObserver();
+
+        observer.addOnGlobalLayoutListener(() -> {
+            int w = mPhotoView.getMeasuredWidth();
+            int h = mPhotoView.getMeasuredHeight();
+            updatePhotoView(w, h);
+        });
+
+        mPhotoView.setOnClickListener(v->{
+            FragmentManager fragmentManager = getFragmentManager();
+            ImageFragment img_fragment = ImageFragment.newInstance(mPhotoFile.getPath());
+            img_fragment.show(fragmentManager, DIALOG_IMAGE);
         });
 
 
@@ -238,7 +282,9 @@ public class CrimeFragment extends Fragment {
                 }
             }
         }
-
+//        else if (requestCode == REQUEST_PHOTO) {
+//            updatePhotoView();
+//        }
     }
 
     private void onReceiveDate(Date date_received) {
@@ -281,5 +327,14 @@ public class CrimeFragment extends Fragment {
 
         String report = getString(R.string.crime_report, mCrime.getTitle(), dateString, solvedString, suspect);
         return report;
+    }
+
+    private void updatePhotoView(int w, int h) {
+        if (mPhotoFile == null || !mPhotoFile.exists()) {
+            mPhotoView.setImageDrawable(null);
+        } else {
+            Bitmap bitmap = PictureUtils.getScaledBitmap(mPhotoFile.getPath(), w, h);
+            mPhotoView.setImageBitmap(bitmap);
+        }
     }
 }
