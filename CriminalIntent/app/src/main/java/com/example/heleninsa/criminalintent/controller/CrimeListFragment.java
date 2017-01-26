@@ -1,5 +1,7 @@
 package com.example.heleninsa.criminalintent.controller;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -28,6 +30,13 @@ import java.util.List;
 
 public class CrimeListFragment extends Fragment {
 
+    //回调函数接口
+    public interface Callbacks {
+
+        void onCrimeSelected(Crime crime) ;
+
+    }
+
     private final static String SAVED_SUBTITLE_VISIBLE = "subtitle";
 
     private RecyclerView mRecyclerView;
@@ -37,8 +46,22 @@ public class CrimeListFragment extends Fragment {
 
     private boolean mSubtitleVisible;
 
+    private Callbacks mCallbacks;
+
 //    private int mLocation;
 
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        mCallbacks = (Callbacks) context;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mCallbacks = null;
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -64,7 +87,7 @@ public class CrimeListFragment extends Fragment {
         return view;
     }
 
-    private void updateUI() {
+    public void updateUI() {
         CrimeLab crimeLab = CrimeLab.getInstance(getActivity());
         List<Crime> crimes = crimeLab.getCrimes();
         if (mAdapter == null) {
@@ -112,8 +135,8 @@ public class CrimeListFragment extends Fragment {
             case R.id.menu_item_new_crime:
                 Crime crime = new Crime();
                 CrimeLab.getInstance(getActivity()).addCrime(crime);
-                Intent intent = CrimePageActivity.newIntent(getActivity(), crime.getId());
-                startActivity(intent);
+                updateUI();
+                mCallbacks.onCrimeSelected(crime);
                 return true;
             case R.id.menu_item_show_subtitle:
                 mSubtitleVisible = !mSubtitleVisible;
@@ -172,8 +195,9 @@ public class CrimeListFragment extends Fragment {
         @Override
         public void onClick(View view) {
 //            mLocation = getLayoutPosition();
-            Intent intent = CrimePageActivity.newIntent(getActivity(), mCrime.getId());
-            startActivity(intent);
+//            Intent intent = CrimePageActivity.newIntent(getActivity(), mCrime.getId());
+//            startActivity(intent);
+            mCallbacks.onCrimeSelected(mCrime);
         }
     }
 

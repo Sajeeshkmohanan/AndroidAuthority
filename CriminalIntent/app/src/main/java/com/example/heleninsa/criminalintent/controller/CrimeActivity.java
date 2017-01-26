@@ -4,9 +4,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.Fragment;
 
+import com.example.heleninsa.criminalintent.model.Crime;
+
 import java.util.UUID;
 
-public class CrimeActivity extends SimpleFragmentActivity {
+public class CrimeActivity extends SimpleFragmentActivity implements CrimeFragment.Callbacks {
 
     public final static String EXTRA_CRIME_ID = "com.heleninsa.criminalintent.controller.crime_id";
 
@@ -21,4 +23,14 @@ public class CrimeActivity extends SimpleFragmentActivity {
         UUID crimeId = (UUID) getIntent().getSerializableExtra(EXTRA_CRIME_ID);
         return CrimeFragment.newInstance(crimeId);
     }
+
+    @Override
+    public void onCrimeUpdate(Crime crime) {
+    }
+
+    @Override
+    public void onCrimeDelete() {
+
+    }
+
 }
