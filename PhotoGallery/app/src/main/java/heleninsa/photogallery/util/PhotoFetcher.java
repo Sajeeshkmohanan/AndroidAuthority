@@ -28,7 +28,9 @@ import heleninsa.photogallery.module.GalleryItem;
 
 public class PhotoFetcher {
 
-    private final static String API_KEY = "5112eeab1ff861a757952d2a88bd1975";
+    private final static String API_KEY = "b0506759b4ec77ddcece26fb1eebb4fe";
+
+    private final static String API_PS = "0474781d99be478b";
 
     private List<GalleryItem> mGalleryItems = new ArrayList<>();
 
@@ -64,9 +66,9 @@ public class PhotoFetcher {
     }
 
     public List<GalleryItem> fetchItems() {
-        Log.d("Net", "Here");
+//        Log.d("Net", "Here");
         try {
-            String url = Uri.parse("http://api.flickr.com/services/rest/").buildUpon().
+            String url = Uri.parse("https://api.flickr.com/services/rest/").buildUpon().
                     appendQueryParameter("method", "flickr.photos.getRecent").
                     appendQueryParameter("api_key", API_KEY).
                     appendQueryParameter("format", "json").
@@ -75,11 +77,14 @@ public class PhotoFetcher {
                     .build().toString();
 
             String jsonString = getUrlString(url);
-            Log.d("Net", "fetchItems:  " + jsonString);
+//            Log.d("Net", "fetchItems:  " + jsonString);
             JSONObject jsonObject = new JSONObject(jsonString);
+//            JsonObject jsonObject = new JsonObject();
 
             parseItems(mGalleryItems, jsonObject);
-        } catch (IOException|JSONException e) {
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
             e.printStackTrace();
         }
         return mGalleryItems;
@@ -101,6 +106,7 @@ public class PhotoFetcher {
         }
     }
 
+    //Bean 一定要写全
     private void parseItems(List<GalleryItem> items, JsonObject jsonBody) {
         JsonObject photos = jsonBody.get("photos").getAsJsonObject();
         JsonArray photoArray = photos.get("photo").getAsJsonArray();

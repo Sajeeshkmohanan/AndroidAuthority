@@ -44,7 +44,7 @@ public class PhotoGalleryFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d("Net", "N H");
+//        Log.d("Net", "N H");
         setRetainInstance(true);
         new FetcherItemsTask().execute();
         //NetConnection
