@@ -10,10 +10,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +29,7 @@ public class PhotoGalleryFragment extends Fragment {
 
     private List<GalleryItem> mItems = new ArrayList<>();
 
+    private int page = 1;
 
     public static PhotoGalleryFragment newInstance() {
         Bundle args = new Bundle();
@@ -46,7 +45,7 @@ public class PhotoGalleryFragment extends Fragment {
         super.onCreate(savedInstanceState);
 //        Log.d("Net", "N H");
         setRetainInstance(true);
-        new FetcherItemsTask().execute();
+        load();
         //NetConnection
     }
 
@@ -62,8 +61,34 @@ public class PhotoGalleryFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_photo_gallery, container, false);
         mPhotoRecyclerView = (RecyclerView) v.findViewById(R.id.fragment_photo_gallery_recycler_view);
         mPhotoRecyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 3));
+        mPhotoRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                int onShow = recyclerView.getChildCount();
+                int total = recyclerView.getAdapter().getItemCount();
+                int first = recyclerView.getChildLayoutPosition(recyclerView.getChildAt(0));
+//                Log.w("LOADMORE", first + " pic");
+
+                if((first + onShow) + 1 >= total)  {
+                    recyclerView.scrollToPosition(0);
+                    //load next page
+                    page ++ ;
+                    load();
+//                    Log.w("LOADMORE", "load more pics");
+                } else if(first < onShow){
+                    //last page
+                    page --;
+                    load();
+                }
+            }
+        });
         setUpAdapter();
         return v;
+    }
+
+    private void load() {
+        new FetcherItemsTask().execute(page);
     }
 
     private class PhotoAdapter extends RecyclerView.Adapter<PhotoHolder> {
@@ -110,11 +135,17 @@ public class PhotoGalleryFragment extends Fragment {
 
     }
 
-    private class FetcherItemsTask extends AsyncTask<Void, Void, List<GalleryItem>> {
+    private class FetcherItemsTask extends AsyncTask<Integer, Void, List<GalleryItem>> {
 
         @Override
-        protected List<GalleryItem> doInBackground(Void... params) {
-            return new PhotoFetcher().fetchItems();
+        protected List<GalleryItem> doInBackground(Integer... params) {
+            int page;
+            if (params == null) {
+                page = 1;
+            } else {
+                page = params[0];
+            }
+            return new PhotoFetcher().fetchItems(page);
         }
 
         @Override

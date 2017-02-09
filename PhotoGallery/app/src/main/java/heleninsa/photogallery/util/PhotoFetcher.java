@@ -65,7 +65,7 @@ public class PhotoFetcher {
         return new String(getUrlBytes(urlSpec));
     }
 
-    public List<GalleryItem> fetchItems() {
+    public List<GalleryItem> fetchItems(int page) {
 //        Log.d("Net", "Here");
         try {
             String url = Uri.parse("https://api.flickr.com/services/rest/").buildUpon().
@@ -73,6 +73,7 @@ public class PhotoFetcher {
                     appendQueryParameter("api_key", API_KEY).
                     appendQueryParameter("format", "json").
                     appendQueryParameter("nojsoncallback", "1").
+                    appendQueryParameter("page", String.format("%d", page)).
                     appendQueryParameter("extras", "url_s")
                     .build().toString();
 
