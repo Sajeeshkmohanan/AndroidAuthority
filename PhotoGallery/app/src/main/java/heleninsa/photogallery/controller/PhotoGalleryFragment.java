@@ -38,6 +38,7 @@ import heleninsa.photogallery.util.ThumbnailDownloader;
 public class PhotoGalleryFragment extends Fragment {
 
     private RecyclerView mPhotoRecyclerView;
+    private View mLoadingView;
 
     private List<GalleryItem> mItems = new ArrayList<>();
 
@@ -65,6 +66,7 @@ public class PhotoGalleryFragment extends Fragment {
         setHasOptionsMenu(true);
         loadImageList();
         mCache = new GalleryCache();
+
         //NetConnection
         mThumbnailDownloader = new ThumbnailDownloader<>(new Handler());
         mThumbnailDownloader.setListener(new ThumbnailDownloader.ThumbnailDownloadListener<PhotoHolder>() {
@@ -131,6 +133,10 @@ public class PhotoGalleryFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_photo_gallery, container, false);
+        //Init LoadingView
+        mLoadingView = v.findViewById(R.id.fragment_photo_gallery_loading_view);
+        mLoadingView.setVisibility(View.GONE);
+
         mPhotoRecyclerView = (RecyclerView) v.findViewById(R.id.fragment_photo_gallery_recycler_view);
         mPhotoRecyclerView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
@@ -253,6 +259,13 @@ public class PhotoGalleryFragment extends Fragment {
         }
 
         @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            mPhotoRecyclerView.setVisibility(View.GONE);
+            mLoadingView.setVisibility(View.VISIBLE);
+        }
+
+        @Override
         protected List<GalleryItem> doInBackground(Integer... params) {
             int page;
             if (params == null) {
@@ -267,6 +280,8 @@ public class PhotoGalleryFragment extends Fragment {
         protected void onPostExecute(List<GalleryItem> items) {
             mItems = items;
             setUpAdapter();
+            mPhotoRecyclerView.setVisibility(View.VISIBLE);
+            mLoadingView.setVisibility(View.GONE);
         }
     }
 }
