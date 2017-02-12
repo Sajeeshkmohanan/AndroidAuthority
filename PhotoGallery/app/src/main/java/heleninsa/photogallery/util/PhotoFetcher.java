@@ -1,11 +1,9 @@
 package heleninsa.photogallery.util;
 
 import android.net.Uri;
-import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import org.json.JSONArray;
@@ -32,6 +30,10 @@ public class PhotoFetcher {
 
     private final static String API_PS = "0474781d99be478b";
 
+    private final static String METHOD_GET_RECENT = "flickr.photos.getRecent";
+
+    private final static String METHOD_SEARCH = "flickr.photos.search";
+
     private List<GalleryItem> mGalleryItems = new ArrayList<>();
 
 
@@ -43,7 +45,7 @@ public class PhotoFetcher {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             InputStream in = connection.getInputStream();
 
-            if(connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
+            if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
                 throw new IOException(connection.getResponseMessage() + " : with" + urlSpec);
             }
 
@@ -65,17 +67,15 @@ public class PhotoFetcher {
         return new String(getUrlBytes(urlSpec));
     }
 
-    public List<GalleryItem> fetchItems(int page) {
+    /**
+     * @param keyword : Search Keyword
+     * @param page    : Page of image
+     * @return
+     */
+    public List<GalleryItem> fetchItems(String keyword, int page) {
 //        Log.d("Net", "Here");
         try {
-            String url = Uri.parse("https://api.flickr.com/services/rest/").buildUpon().
-                    appendQueryParameter("method", "flickr.photos.getRecent").
-                    appendQueryParameter("api_key", API_KEY).
-                    appendQueryParameter("format", "json").
-                    appendQueryParameter("nojsoncallback", "1").
-                    appendQueryParameter("page", String.format("%d", page)).
-                    appendQueryParameter("extras", "url_s")
-                    .build().toString();
+            String url = urlConstructor(keyword, page);
 
             String jsonString = getUrlString(url);
 //            Log.d("Net", "fetchItems:  " + jsonString);
@@ -91,12 +91,32 @@ public class PhotoFetcher {
         return mGalleryItems;
     }
 
+    private String urlConstructor(String keyword, int page) {
+
+        Uri.Builder url = Uri.parse("https://api.flickr.com/services/rest/").buildUpon().
+                appendQueryParameter("format", "json").
+                appendQueryParameter("nojsoncallback", "1").
+                appendQueryParameter("page", String.format("%d", page < 1 ? 1 : page)).
+                appendQueryParameter("extras", "url_s");
+        String method;
+        if (keyword == null) {
+            method = METHOD_GET_RECENT;
+
+        } else {
+            method = METHOD_SEARCH;
+            url.appendQueryParameter("text", keyword);
+        }
+        url.appendQueryParameter("api_key", method);
+        return url.build().toString();
+    }
+
+
     private void parseItems(List<GalleryItem> items, JSONObject jsonBody) throws JSONException {
         JSONObject photosJson = jsonBody.getJSONObject("photos");
         JSONArray photoArray = photosJson.getJSONArray("photo");
-        for (int i = 0; i < photoArray.length(); i ++) {
+        for (int i = 0; i < photoArray.length(); i++) {
             JSONObject object = photoArray.getJSONObject(i);
-            if(!object.has("url_s")) {
+            if (!object.has("url_s")) {
                 continue;
             }
             GalleryItem item = new GalleryItem();
@@ -111,7 +131,7 @@ public class PhotoFetcher {
     private void parseItems(List<GalleryItem> items, JsonObject jsonBody) {
         JsonObject photos = jsonBody.get("photos").getAsJsonObject();
         JsonArray photoArray = photos.get("photo").getAsJsonArray();
-        for(int i = 0; i < photoArray.size(); i ++) {
+        for (int i = 0; i < photoArray.size(); i++) {
             JsonObject each = photoArray.get(i).getAsJsonObject();
             Gson gson = new Gson();
             GalleryItem item = gson.fromJson(each, GalleryItem.class);
