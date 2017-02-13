@@ -28,6 +28,7 @@ import java.util.List;
 import heleninsa.photogallery.R;
 import heleninsa.photogallery.module.GalleryCache;
 import heleninsa.photogallery.module.GalleryItem;
+import heleninsa.photogallery.service.PollService;
 import heleninsa.photogallery.util.PhotoFetcher;
 import heleninsa.photogallery.util.ThumbnailDownloader;
 
@@ -115,6 +116,13 @@ public class PhotoGalleryFragment extends Fragment {
                 searchView.setQuery(QueryPreferences.getStoredQueryKey(getContext()), false);
             }
         });
+
+        final MenuItem item = menu.findItem(R.id.menu_item_polling);
+        if (PollService.isAlarmOn(getContext())) {
+            item.setTitle(R.string.stop_polling);
+        } else {
+            item.setTitle(R.string.start_polling);
+        }
     }
 
     @Override
@@ -123,6 +131,11 @@ public class PhotoGalleryFragment extends Fragment {
             case R.id.menu_item_clear:
                 QueryPreferences.setStoredQuery(getContext(), null);
                 loadImageList();
+                return true;
+            case R.id.menu_item_polling:
+                boolean turnOnAlarm = !PollService.isAlarmOn(getContext());
+                PollService.setServiceAlarm(getContext(), turnOnAlarm);
+                getActivity().invalidateOptionsMenu();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -261,8 +274,10 @@ public class PhotoGalleryFragment extends Fragment {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            mPhotoRecyclerView.setVisibility(View.GONE);
-            mLoadingView.setVisibility(View.VISIBLE);
+            if (mPhotoRecyclerView != null && mLoadingView != null) {
+                mPhotoRecyclerView.setVisibility(View.GONE);
+                mLoadingView.setVisibility(View.VISIBLE);
+            }
         }
 
         @Override
@@ -280,8 +295,10 @@ public class PhotoGalleryFragment extends Fragment {
         protected void onPostExecute(List<GalleryItem> items) {
             mItems = items;
             setUpAdapter();
-            mPhotoRecyclerView.setVisibility(View.VISIBLE);
-            mLoadingView.setVisibility(View.GONE);
+            if (mPhotoRecyclerView != null && mLoadingView != null) {
+                mPhotoRecyclerView.setVisibility(View.VISIBLE);
+                mLoadingView.setVisibility(View.GONE);
+            }
         }
     }
 }

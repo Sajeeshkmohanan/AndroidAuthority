@@ -97,7 +97,8 @@ public class PhotoFetcher {
                 appendQueryParameter("format", "json").
                 appendQueryParameter("nojsoncallback", "1").
                 appendQueryParameter("page", String.format("%d", page < 1 ? 1 : page)).
-                appendQueryParameter("extras", "url_s");
+                appendQueryParameter("extras", "url_s").
+                appendQueryParameter("api_key", API_KEY);
         String method;
         if (keyword == null) {
             method = METHOD_GET_RECENT;
@@ -106,7 +107,7 @@ public class PhotoFetcher {
             method = METHOD_SEARCH;
             url.appendQueryParameter("text", keyword);
         }
-        url.appendQueryParameter("api_key", method);
+        url.appendQueryParameter("method", method);
         return url.build().toString();
     }
 
