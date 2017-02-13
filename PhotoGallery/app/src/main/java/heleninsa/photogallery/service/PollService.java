@@ -44,33 +44,7 @@ public class PollService extends IntentService {
         if (!checkNetwork()) {
             return;
         }
-
-        String query = QueryPreferences.getStoredQueryKey(this);
-        String result_id = QueryPreferences.getStoredID(this);
-        List<GalleryItem> items = new PhotoFetcher().fetchItems(query, 1);
-        if(items.isEmpty() || result_id == null) {
-            return;
-        }
-        String newId = items.get(0).getId();
-        if(!newId.equals(result_id)) {
-
-            Resources resources = getResources();
-            Intent i = PhotoGalleryActivity.newIntent(this);
-            PendingIntent pi = PendingIntent.getActivity(this, 0, i, 0);
-
-            Notification notification = new NotificationCompat.Builder(this)
-                    .setTicker(resources.getString(R.string.new_pictures_title))
-                    .setSmallIcon(android.R.drawable.ic_menu_report_image)
-                    .setContentTitle(resources.getString(R.string.new_pictures_title))
-                    .setContentText(resources.getString(R.string.new_pictures_text))
-                    .setContentIntent(pi)
-                    .setAutoCancel(true)
-                    .build();
-
-            NotificationManagerCompat manager = NotificationManagerCompat.from(this);
-            manager.notify(0, notification);
-        }
-        QueryPreferences.setStoredID(this, newId);
+        checkPhotoUpdate(this);
     }
 
     public static void setServiceAlarm(Context context, boolean isOn) {
@@ -98,6 +72,35 @@ public class PollService extends IntentService {
         boolean netAvailable = cm.getActiveNetworkInfo() != null;
         boolean isConnected = netAvailable && cm.getActiveNetworkInfo().isConnected();
         return isConnected;
+    }
+
+    public static void checkPhotoUpdate(Context context) {
+        String query = QueryPreferences.getStoredQueryKey(context);
+        String result_id = QueryPreferences.getStoredID(context);
+        List<GalleryItem> items = new PhotoFetcher().fetchItems(query, 1);
+        if(items.isEmpty() || result_id == null) {
+            return;
+        }
+        String newId = items.get(0).getId();
+        if(!newId.equals(result_id)) {
+
+            Resources resources = context.getResources();
+            Intent i = PhotoGalleryActivity.newIntent(context);
+            PendingIntent pi = PendingIntent.getActivity(context, 0, i, 0);
+
+            Notification notification = new NotificationCompat.Builder(context)
+                    .setTicker(resources.getString(R.string.new_pictures_title))
+                    .setSmallIcon(android.R.drawable.ic_menu_report_image)
+                    .setContentTitle(resources.getString(R.string.new_pictures_title))
+                    .setContentText(resources.getString(R.string.new_pictures_text))
+                    .setContentIntent(pi)
+                    .setAutoCancel(true)
+                    .build();
+
+            NotificationManagerCompat manager = NotificationManagerCompat.from(context);
+            manager.notify(0, notification);
+        }
+        QueryPreferences.setStoredID(context, newId);
     }
 
 }

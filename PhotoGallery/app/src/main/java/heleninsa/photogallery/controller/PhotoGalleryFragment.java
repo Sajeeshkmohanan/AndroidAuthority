@@ -28,9 +28,12 @@ import java.util.List;
 import heleninsa.photogallery.R;
 import heleninsa.photogallery.module.GalleryCache;
 import heleninsa.photogallery.module.GalleryItem;
+import heleninsa.photogallery.service.PollJobService;
 import heleninsa.photogallery.service.PollService;
 import heleninsa.photogallery.util.PhotoFetcher;
 import heleninsa.photogallery.util.ThumbnailDownloader;
+
+import static android.os.Build.VERSION.SDK_INT;
 
 /**
  * Created by heleninsa on 2017/2/6.
@@ -118,7 +121,7 @@ public class PhotoGalleryFragment extends Fragment {
         });
 
         final MenuItem item = menu.findItem(R.id.menu_item_polling);
-        if (PollService.isAlarmOn(getContext())) {
+        if (isAlarmOn()) {
             item.setTitle(R.string.stop_polling);
         } else {
             item.setTitle(R.string.start_polling);
@@ -133,12 +136,28 @@ public class PhotoGalleryFragment extends Fragment {
                 loadImageList();
                 return true;
             case R.id.menu_item_polling:
-                boolean turnOnAlarm = !PollService.isAlarmOn(getContext());
-                PollService.setServiceAlarm(getContext(), turnOnAlarm);
-                getActivity().invalidateOptionsMenu();
+                startPoll();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void startPoll() {
+        boolean turnOnAlarm = !isAlarmOn();
+        if(SDK_INT >= 21) {
+            PollJobService.setServiceAlarm(getContext(), turnOnAlarm);
+        } else {
+            PollService.setServiceAlarm(getContext(), turnOnAlarm);
+        }
+        getActivity().invalidateOptionsMenu();
+    }
+
+    private boolean isAlarmOn() {
+        if (SDK_INT >= 21) {
+            return PollJobService.isAlarmOn(getContext());
+        } else {
+            return PollService.isAlarmOn(getContext());
         }
     }
 
